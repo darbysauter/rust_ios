@@ -1,0 +1,17 @@
+[target.aarch64-apple-ios]
+# uncomment this to make `cargo run` execute programs on QEMU
+# runner = "qemu-system-arm -cpu cortex-m3 -machine lm3s6965evb -nographic -semihosting-config enable=on,target=native -kernel"
+
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+# uncomment ONE of these three option to make `cargo run` start a GDB session
+# which option to pick depends on your system
+# runner = "arm-none-eabi-gdb -q -x openocd.gdb"
+# runner = "gdb-multiarch -q -x openocd.gdb"
+# runner = "gdb -q -x openocd.gdb"
+
+rustflags = [
+    "-C", "--sysroot /Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.0.sdk",
+]
+
+[build]
+target = "aarch64-apple-ios"

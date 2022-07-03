@@ -1,0 +1,1 @@
+security cms -D -i rust_ios.app/Rust_App_Provisioning_Profile.mobileprovision > rust_ios.app/rust_ios.entitlements
