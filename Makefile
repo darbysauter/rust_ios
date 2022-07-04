@@ -40,8 +40,11 @@ rust_ios.ipa: $(APP)
 	cp -r $(APP) Payload
 	rm -rf $(APP)
 	zip -r rust_ios.ipa Payload
-	rm -rf $(APP) Payload
+	rm -rf Payload
 
-.PHONY: clean
+install: rust_ios.ipa
+	ideviceinstaller -i rust_ios.ipa
+
+.PHONY: clean install
 clean:
 	rm -rf MakeTest.ipa

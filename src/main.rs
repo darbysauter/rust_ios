@@ -24,7 +24,7 @@ fn main() {
     };
 
     unsafe {
-        let app_del_class = objc_msgSend(rust_objc_get_class("AppDelegate"), rust_sel_get_uid("class"));
+        let app_del_class = objc_msgSend(rust_objc_get_class("MyAppDelegate"), rust_sel_get_uid("class"));
         let ui_app_class = objc_msgSend(rust_objc_get_class("UIApplication"), rust_sel_get_uid("class"));
         UIApplicationMain(argc.try_into().unwrap(), argv, NSStringFromClass(ui_app_class.to_class()), NSStringFromClass(app_del_class.to_class()));
         // [autorelease_pool drain];

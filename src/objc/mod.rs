@@ -21,6 +21,10 @@ pub struct Sel(usize);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(transparent)]
+pub struct Ivar(usize);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct CGContextRef(usize);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -35,6 +39,7 @@ pub enum Bool {
 }
 
 pub type Imp = extern "C" fn(Id, Sel, ...);
+pub type MsgSendRetCGRect = extern "C" fn(Id, Sel, ...) -> CGRect;
 
 #[repr(C)]
 pub struct CGSize {
@@ -73,6 +78,18 @@ impl CGRect {
     }
 }
 
+#[repr(C)]
+pub struct ObjcSuper {
+    receiver: Id,
+    super_class: Class,
+}
+
+impl ObjcSuper {
+    pub fn new(receiver: Id, super_class: Class) -> ObjcSuper {
+        ObjcSuper { receiver, super_class }
+    }
+}
+
 #[link(name = "Foundation", kind = "framework")]
 #[link(name = "UIKit", kind = "framework")]
 extern "C" {
@@ -84,7 +101,12 @@ extern "C" {
     pub fn CGContextAddRect(c: CGContextRef, rect: CGRect);
     pub fn CGContextFillPath(c: CGContextRef);
     pub fn NSStringFromClass(aClass: Class) -> *const NSString;
-
+    pub fn object_setIvar(obj: Id, ivar: Ivar, value: Id);
+    pub fn class_getSuperclass(cls: Class) -> Class;
+    pub fn object_getClass(obj: Id) -> Class;
+    pub fn objc_msgSendSuper(sup: &ObjcSuper, sel: Sel, args: ...) -> Id;
+    
+    fn class_getInstanceVariable(cls: Class, name: *const c_char) -> Ivar;
     fn sel_registerName(c: *const c_char) -> Sel;
     fn sel_getUid(c: *const c_char) -> Sel;
     fn objc_getClass(c: *const c_char) -> Id;
@@ -147,4 +169,17 @@ pub fn rust_class_add_method(cls: Class, name: Sel, imp: Imp, types: &str) -> Bo
     unsafe {
         class_addMethod(cls, name, imp, types.as_ptr())
     }
+}
+
+pub fn rust_class_get_instance_variable(cls: Class, name: &str) -> Ivar {
+    let name = CString::new(name).expect("CString::new failed");
+    unsafe {
+        class_getInstanceVariable(cls, name.as_ptr())
+    }
+}
+
+pub unsafe extern "C" fn rust_objc_msg_send_ret_cgrect(obj: Id, sel: Sel, args: ...) -> CGRect {
+
+    let cast_fn: MsgSendRetCGRect = *(&objc_msgSend as *const _ as usize as *const MsgSendRetCGRect);
+    cast_fn(obj, sel, args)
 }
