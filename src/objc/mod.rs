@@ -9,6 +9,12 @@ pub struct Class(usize);
 #[repr(transparent)]
 pub struct Id(usize);
 
+impl Id {
+    pub fn to_class(self) -> Class {
+        Class { 0: self.0 }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(transparent)]
 pub struct Sel(usize);
@@ -16,6 +22,10 @@ pub struct Sel(usize);
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(transparent)]
 pub struct CGContextRef(usize);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(transparent)]
+pub struct NSString(usize);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -66,13 +76,14 @@ impl CGRect {
 #[link(name = "Foundation", kind = "framework")]
 #[link(name = "UIKit", kind = "framework")]
 extern "C" {
-    pub fn UIApplicationMain(argc: c_int, argv: *const *const c_char, principalClassName: usize, delegateClassName: usize) -> c_int;
+    pub fn UIApplicationMain(argc: c_int, argv: *const *const c_char, principalClassName: *const NSString, delegateClassName: *const NSString) -> c_int;
     pub fn objc_msgSend(obj: Id, sel: Sel, args: ...) -> Id;
     pub fn objc_registerClassPair(cls: Class);
     pub fn UIGraphicsGetCurrentContext() -> CGContextRef;
     pub fn CGContextSetFillColor(c: CGContextRef, components: *const f64);
     pub fn CGContextAddRect(c: CGContextRef, rect: CGRect);
     pub fn CGContextFillPath(c: CGContextRef);
+    pub fn NSStringFromClass(aClass: Class) -> *const NSString;
 
     fn sel_registerName(c: *const c_char) -> Sel;
     fn sel_getUid(c: *const c_char) -> Sel;

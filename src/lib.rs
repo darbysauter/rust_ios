@@ -1,3 +1,3 @@
 pub mod app_delegate;
 pub mod objc;
-pub mod view;
+pub mod viewcontroller;
