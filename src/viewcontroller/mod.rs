@@ -1,4 +1,3 @@
-use ctor::*;
 use crate::objc::*;
 
 extern "C" fn my_viewcontroller_init(obj: Id, _cmd: Sel) -> Id {
@@ -27,8 +26,7 @@ extern "C" fn my_viewcontroller_load_view(obj: Id, _cmd: Sel) {
     }
 }
 
-#[ctor]
-fn init_my_viewcontroller() {
+pub fn init_my_viewcontroller() {
     let my_viewcontroller_class = rust_objc_allocate_class_pair(rust_objc_get_class("UIViewController"), "MyViewController", 0);
 
     let cast_fn: Imp = unsafe {

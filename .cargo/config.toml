@@ -11,6 +11,9 @@
 
 rustflags = [
     "-C", "--sysroot /Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.0.sdk",
+    "-C", "link-arg=-framework IOKit",
+    "-C", "link-arg=-framework Foundation",
+    "-C", "link-arg=-lobjc",
 ]
 
 [build]

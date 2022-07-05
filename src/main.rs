@@ -4,8 +4,13 @@
 use std::ffi::CString;
 use std::os::raw::c_char;
 use rust_ios::objc::*;
+use rust_ios::viewcontroller::init_my_viewcontroller;
+use rust_ios::app_delegate::init_app_del;
 
 fn main() {
+    init_my_viewcontroller();
+    init_app_del();
+
     // create a vector of zero terminated strings
     let args = std::env::args().map(|arg| CString::new(arg).unwrap() ).collect::<Vec<CString>>();
     // convert the strings to raw pointers

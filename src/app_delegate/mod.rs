@@ -1,4 +1,3 @@
-use ctor::*;
 use crate::objc::*;
 use std::mem;
 
@@ -25,8 +24,7 @@ extern "C" fn app_del_did_finish_launching(obj: Id, _cmd: Sel, _application: usi
     return Bool::Yes;
 }
 
-#[ctor]
-fn init_app_del() {
+pub fn init_app_del() {
     let app_del_class = rust_objc_allocate_class_pair(rust_objc_get_class("UIResponder"), "MyAppDelegate", 0);
 
     rust_class_add_ivar(app_del_class, "window", mem::size_of::<Id>(), (mem::size_of::<Id>() as f64).log2() as u8, "@");
