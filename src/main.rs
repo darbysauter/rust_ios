@@ -1,21 +1,18 @@
 #![feature(c_variadic)]
 #![feature(vec_into_raw_parts)]
+#![feature(lang_items)]
+#![feature(termination_trait_lib)]
+#![feature(start)]
 
-use std::ffi::CString;
-use std::os::raw::c_char;
 use rust_ios::objc::*;
 use rust_ios::viewcontroller::init_my_viewcontroller;
 use rust_ios::app_delegate::init_app_del;
 
-fn main() {
-    init_my_viewcontroller();
-    init_app_del();
+#[start]
+fn start(argc: isize, argv: *const *const u8) -> isize {
 
-    // create a vector of zero terminated strings
-    let args = std::env::args().map(|arg| CString::new(arg).unwrap() ).collect::<Vec<CString>>();
-    // convert the strings to raw pointers
-    let c_args = args.iter().map(|arg| arg.as_ptr()).collect::<Vec<*const c_char>>();
-    let (argv, argc, _cap) = c_args.into_raw_parts();
+    init_app_del();
+    init_my_viewcontroller();
 
     // Create an @autoreleasepool, using the old-stye API. 
     // Note that while NSAutoreleasePool IS deprecated, it still exists 
@@ -29,10 +26,14 @@ fn main() {
     };
 
     unsafe {
+        // [MyAppDelegate class]
         let app_del_class = objc_msgSend(rust_objc_get_class("MyAppDelegate"), rust_sel_get_uid("class"));
+        // [UIApplication class]
         let ui_app_class = objc_msgSend(rust_objc_get_class("UIApplication"), rust_sel_get_uid("class"));
-        UIApplicationMain(argc.try_into().unwrap(), argv, NSStringFromClass(ui_app_class.to_class()), NSStringFromClass(app_del_class.to_class()));
+        UIApplicationMain(argc.try_into().unwrap(), argv as usize as *const *const i8, NSStringFromClass(ui_app_class.to_class()), NSStringFromClass(app_del_class.to_class()));
         // [autorelease_pool drain];
         objc_msgSend(autorelease_pool, rust_sel_register_name("drain"));
     }
+
+    0
 }

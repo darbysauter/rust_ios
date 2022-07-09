@@ -15,6 +15,7 @@ $(APP): rust_ios $(RES)/Info.plist
 	mkdir -p $(APP)
 
 	cp target/aarch64-apple-ios/release/rust_ios $(APP)/$(TARGET_GUI)
+	cp target/aarch64-apple-ios/release/rust_ios ./
 
 	cp res/*.mobileprovision $(APP)/embedded.mobileprovision
 

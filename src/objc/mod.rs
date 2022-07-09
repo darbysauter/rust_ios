@@ -141,8 +141,6 @@ pub fn rust_objc_get_class(name: &str) -> Id {
 }
 
 pub fn rust_cfstr(s: &str) -> usize {
-    // Notice the use of CFSTR here. We cannot use an objective-c string 
-    // literal @"someStr", as that would be using objective-c, obviously.
     let string = CString::new(s).expect("CString::new failed");
     unsafe {
         __CFStringMakeConstantString(string.as_ptr())

@@ -29,14 +29,14 @@ extern "C" fn my_viewcontroller_load_view(obj: Id, _cmd: Sel) {
 pub fn init_my_viewcontroller() {
     let my_viewcontroller_class = rust_objc_allocate_class_pair(rust_objc_get_class("UIViewController"), "MyViewController", 0);
 
-    let cast_fn: Imp = unsafe {
+    let my_vc_init: Imp = unsafe {
         *(&my_viewcontroller_init as *const _ as usize as *const Imp)
     };
-    rust_class_add_method(my_viewcontroller_class, rust_sel_get_uid("init"), cast_fn, "@@:");
-    let cast_fn: Imp = unsafe {
+    rust_class_add_method(my_viewcontroller_class, rust_sel_get_uid("init"), my_vc_init, "@@:");
+    let my_vc_load_view: Imp = unsafe {
         *(&my_viewcontroller_load_view as *const _ as usize as *const Imp)
     };
-    rust_class_add_method(my_viewcontroller_class, rust_sel_get_uid("loadView"), cast_fn, "v@:");
+    rust_class_add_method(my_viewcontroller_class, rust_sel_get_uid("loadView"), my_vc_load_view, "v@:");
 
     unsafe {
         objc_registerClassPair(my_viewcontroller_class);
