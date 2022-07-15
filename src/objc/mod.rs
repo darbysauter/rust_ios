@@ -92,7 +92,7 @@ extern "C" {
     pub fn CGContextSetFillColor(c: CGContextRef, components: *const f64);
     pub fn CGContextAddRect(c: CGContextRef, rect: CGRect);
     pub fn CGContextFillPath(c: CGContextRef);
-    pub fn NSStringFromClass(aClass: Class) -> *const NSString;
+    pub fn NSStringFromClass(aClass: *mut Id) -> *const NSString;
     pub fn object_setIvar(obj: *mut Id, ivar: Ivar, value: *mut Id);
     pub fn class_getSuperclass(cls: *mut Id) -> *mut Id;
     pub fn object_getClass(obj: *mut Id) -> *mut Id;
