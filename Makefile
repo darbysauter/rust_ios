@@ -9,13 +9,13 @@ ID				 = iPhone Developer: Darby Sauter (56QNC7F8PY)
 default: rust_ios.ipa
 
 rust_ios:
-	cargo build -Z unstable-options --release
+	cargo build -Z unstable-options -Zbuild-std --release
 
 $(APP): rust_ios $(RES)/Info.plist
 	mkdir -p $(APP)
 
 	cp target/aarch64-apple-ios/release/rust_ios $(APP)/$(TARGET_GUI)
-	cp target/aarch64-apple-ios/release/rust_ios ./
+	cp target/aarch64-apple-ios/release/rust_ios ./out
 
 	cp res/*.mobileprovision $(APP)/embedded.mobileprovision
 

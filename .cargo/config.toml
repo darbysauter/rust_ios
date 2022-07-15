@@ -9,12 +9,17 @@
 # runner = "gdb-multiarch -q -x openocd.gdb"
 # runner = "gdb -q -x openocd.gdb"
 
-rustflags = [
-    "-C", "--sysroot /Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.0.sdk",
-    "-C", "link-arg=-framework IOKit",
-    "-C", "link-arg=-framework Foundation",
-    "-C", "link-arg=-lobjc",
-]
+
 
 [build]
 target = "aarch64-apple-ios"
+rustflags = [
+    "--sysroot=/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.0.sdk",
+    "-C", "link-args=-framework IOKit",
+    "-C", "link-args=-framework Foundation",
+    "-C", "link-args=-framework UIKit",
+    # "-C", "link-args=-lobjc",
+    "-C", "link-args=-L/Users/mumphus/Documents/temp/Spice/bin",
+    "-C", "link-args=-lios",
+    # "-C", "link-dead-code",
+]

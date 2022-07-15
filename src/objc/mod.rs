@@ -1,5 +1,6 @@
 use std::ffi::CString;
 use std::os::raw::{ c_char, c_int };
+use std::mem;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(transparent)]
@@ -8,12 +9,6 @@ pub struct Class(usize);
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(transparent)]
 pub struct Id(usize);
-
-impl Id {
-    pub fn to_class(self) -> Class {
-        Class { 0: self.0 }
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(transparent)]
@@ -38,13 +33,13 @@ pub enum Bool {
     Yes = 1,
 }
 
-pub type Imp = extern "C" fn(Id, Sel, ...);
-pub type MsgSendRetCGRect = extern "C" fn(Id, Sel, ...) -> CGRect;
+pub type Imp = extern "C" fn(*mut Id, Sel, ...);
+pub type MsgSendRetCGRect = extern "C" fn(*mut Id, Sel, ...) -> CGRect;
 
 #[repr(C)]
 pub struct CGSize {
-    width: f64,
-    height: f64,
+    pub width: f64,
+    pub height: f64,
 }
 
 impl CGSize {
@@ -55,8 +50,8 @@ impl CGSize {
 
 #[repr(C)]
 pub struct CGPoint {
-    x: f64,
-    y: f64,
+    pub x: f64,
+    pub y: f64,
 }
 
 impl CGPoint {
@@ -67,8 +62,8 @@ impl CGPoint {
 
 #[repr(C)]
 pub struct CGRect {
-    origin: CGPoint,
-    size: CGSize,
+    pub origin: CGPoint,
+    pub size: CGSize,
 }
 
 impl CGRect {
@@ -80,104 +75,60 @@ impl CGRect {
 
 #[repr(C)]
 pub struct ObjcSuper {
-    receiver: Id,
-    super_class: Class,
+    receiver: *mut Id,
+    super_class: *mut Id,
 }
 
 impl ObjcSuper {
-    pub fn new(receiver: Id, super_class: Class) -> ObjcSuper {
+    pub fn new(receiver: *mut Id, super_class: *mut Id) -> ObjcSuper {
         ObjcSuper { receiver, super_class }
     }
 }
 
-#[link(name = "Foundation", kind = "framework")]
-#[link(name = "UIKit", kind = "framework")]
 extern "C" {
     pub fn UIApplicationMain(argc: c_int, argv: *const *const c_char, principalClassName: *const NSString, delegateClassName: *const NSString) -> c_int;
-    pub fn objc_msgSend(obj: Id, sel: Sel, args: ...) -> Id;
-    pub fn objc_registerClassPair(cls: Class);
+    pub fn objc_registerClassPair(cls: *mut Id);
     pub fn UIGraphicsGetCurrentContext() -> CGContextRef;
     pub fn CGContextSetFillColor(c: CGContextRef, components: *const f64);
     pub fn CGContextAddRect(c: CGContextRef, rect: CGRect);
     pub fn CGContextFillPath(c: CGContextRef);
     pub fn NSStringFromClass(aClass: Class) -> *const NSString;
-    pub fn object_setIvar(obj: Id, ivar: Ivar, value: Id);
-    pub fn class_getSuperclass(cls: Class) -> Class;
-    pub fn object_getClass(obj: Id) -> Class;
-    pub fn objc_msgSendSuper(sup: &ObjcSuper, sel: Sel, args: ...) -> Id;
+    pub fn object_setIvar(obj: *mut Id, ivar: Ivar, value: *mut Id);
+    pub fn class_getSuperclass(cls: *mut Id) -> *mut Id;
+    pub fn object_getClass(obj: *mut Id) -> *mut Id;
+    pub fn objc_msgSendSuper(sup: &ObjcSuper, sel: Sel, args: ...) -> *mut Id;
     
-    fn class_getInstanceVariable(cls: Class, name: *const c_char) -> Ivar;
-    fn sel_registerName(c: *const c_char) -> Sel;
-    fn sel_getUid(c: *const c_char) -> Sel;
-    fn objc_getClass(c: *const c_char) -> Id;
-    fn __CFStringMakeConstantString(c: *const c_char) -> usize;
-    fn objc_allocateClassPair(superclass: Id, name: *const c_char, extraBytes: usize) -> Class;
-    fn class_addIvar(cls: Class, name: *const c_char, size: usize, alignment: u8, types: *const c_char) -> Bool;
-    fn class_addMethod(cls: Class, name: Sel, imp: Imp, types: *const c_char) -> Bool;
+    pub fn objc_msgSend(obj: *mut Id, sel: Sel, args: ...) -> *mut Id;
+    
+    pub fn class_getInstanceVariable(cls: *mut Id, name: *const c_char) -> Ivar;
+    pub fn sel_registerName(c: *const c_char) -> Sel;
+    pub fn sel_getUid(c: *const c_char) -> Sel;
+    pub fn objc_getClass(c: *const c_char) -> *mut Id;
+    pub fn __CFStringMakeConstantString(c: *const c_char) -> usize;
+    pub fn objc_allocateClassPair(superclass: *mut Id, name: *const c_char, extraBytes: usize) -> *mut Id;
+    pub fn class_addIvar(cls: *mut Id, name: *const c_char, size: usize, alignment: u8, types: *const c_char) -> Bool;
+    pub fn class_addMethod(cls: *mut Id, name: Sel, imp: usize, types: *const c_char) -> Bool;
 }
 
-pub fn rust_sel_register_name(name: &str) -> Sel {
-    let c_string = CString::new(name).expect("CString::new failed");
-    let sel = unsafe {
-        sel_registerName(c_string.as_ptr())
-    };
-    sel
+// pub unsafe extern "C" fn rust_objc_msg_send_ret_cgrect(obj: Id, sel: Sel, args: ...) -> CGRect {
+//     let cast_fn: MsgSendRetCGRect = *(&objc_msgSend as *const _ as usize as *const MsgSendRetCGRect);
+//     cast_fn(obj, sel, args)
+// }
+
+pub unsafe extern "C" fn rust_msg_send<R>(a: *mut Id, b: Sel, c: ...) -> R {
+    let func = msg_send_fn();
+    func(a, b, c)
 }
 
-pub fn rust_sel_get_uid(name: &str) -> Sel {
-    let c_string = CString::new(name).expect("CString::new failed");
-    let uid = unsafe {
-        sel_getUid(c_string.as_ptr())
-    };
-    uid
+fn msg_send_fn<R>() -> unsafe extern fn(*mut Id, Sel, ...) -> R {
+    unsafe { mem::transmute(objc_msgSend as unsafe extern "C" fn(_, _, ...) -> _) }
 }
 
-pub fn rust_objc_get_class(name: &str) -> Id {
-    let c_string = CString::new(name).expect("CString::new failed");
-    let class = unsafe {
-        objc_getClass(c_string.as_ptr())
-    };
-    class
+pub unsafe extern "C" fn rust_msg_send_super<R>(a: &ObjcSuper, b: Sel, c: ...) -> R {
+    let func = msg_send_super_fn();
+    func(a, b, c)
 }
 
-pub fn rust_cfstr(s: &str) -> usize {
-    let string = CString::new(s).expect("CString::new failed");
-    unsafe {
-        __CFStringMakeConstantString(string.as_ptr())
-    }
-}
-
-pub fn rust_objc_allocate_class_pair(superclass: Id, name: &str, extra_bytes: usize) -> Class {
-    let string = CString::new(name).expect("CString::new failed");
-    unsafe {
-        objc_allocateClassPair(superclass, string.as_ptr(), extra_bytes)
-    }
-}
-
-pub fn rust_class_add_ivar(cls: Class, name: &str, size: usize, alignment: u8, types: &str) -> Bool {
-    let name = CString::new(name).expect("CString::new failed");
-    let types = CString::new(types).expect("CString::new failed");
-    unsafe {
-        class_addIvar(cls, name.as_ptr(), size, alignment, types.as_ptr())
-    }
-}
-
-pub fn rust_class_add_method(cls: Class, name: Sel, imp: Imp, types: &str) -> Bool {
-    let types = CString::new(types).expect("CString::new failed");
-    unsafe {
-        class_addMethod(cls, name, imp, types.as_ptr())
-    }
-}
-
-pub fn rust_class_get_instance_variable(cls: Class, name: &str) -> Ivar {
-    let name = CString::new(name).expect("CString::new failed");
-    unsafe {
-        class_getInstanceVariable(cls, name.as_ptr())
-    }
-}
-
-pub unsafe extern "C" fn rust_objc_msg_send_ret_cgrect(obj: Id, sel: Sel, args: ...) -> CGRect {
-
-    let cast_fn: MsgSendRetCGRect = *(&objc_msgSend as *const _ as usize as *const MsgSendRetCGRect);
-    cast_fn(obj, sel, args)
+fn msg_send_super_fn<R>() -> unsafe extern fn(&ObjcSuper, Sel, ...) -> R {
+    unsafe { mem::transmute(objc_msgSendSuper as unsafe extern "C" fn(_, _, ...) -> _) }
 }
