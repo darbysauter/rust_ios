@@ -9,7 +9,7 @@ extern "C" fn my_viewcontroller_init(obj: *mut Id, _cmd: Sel) -> Id {
         let sup_info = ObjcSuper::new(obj, sup);
 
         // [super initWithNibName:nil bundle:nil]
-        let ret = rust_msg_send_super(&sup_info, sel_getUid(cstr!("initWithNibName:bundle:").as_ptr()), 0, 0);
+        let ret = rust_msg_send_super_2(&sup_info, sel_getUid(cstr!("initWithNibName:bundle:").as_ptr()), 0, 0);
         ret
     }
 }
@@ -24,8 +24,8 @@ extern "C" fn my_viewcontroller_load_view(obj: *mut Id, _cmd: Sel) {
         rust_msg_send_super::<()>(&sup_info, sel_getUid(cstr!("loadView").as_ptr()));
     
         // self.view.backgroundColor = [UIColor colorWithHue:0.0 saturation:0.0 brightness:0.2 alpha:1.0];
-        let color: *mut Id = rust_msg_send(objc_getClass(cstr!("UIColor").as_ptr()), sel_getUid(cstr!("colorWithHue:saturation:brightness:alpha:").as_ptr()), 0.0f64, 0.0f64, 0.2f64, 1.0f64);
-        rust_msg_send::<()>(rust_msg_send(obj, sel_getUid(cstr!("view").as_ptr())), sel_getUid(cstr!("setBackgroundColor:").as_ptr()), color);
+        let color: *mut Id = rust_msg_send_4(objc_getClass(cstr!("UIColor").as_ptr()), sel_getUid(cstr!("colorWithHue:saturation:brightness:alpha:").as_ptr()), 0.0f64, 0.0f64, 0.2f64, 1.0f64);
+        rust_msg_send_1::<(), *mut Id>(rust_msg_send(obj, sel_getUid(cstr!("view").as_ptr())), sel_getUid(cstr!("setBackgroundColor:").as_ptr()), color);
     }
 }
 

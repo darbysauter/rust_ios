@@ -15,20 +15,21 @@ pub extern "C" fn app_del_did_finish_launching(obj: *mut Id, _cmd: Sel, _applica
         rust_msg_send(
             rust_msg_send(objc_getClass(cstr!("UIScreen").as_ptr()), sel_getUid(cstr!("mainScreen").as_ptr())), 
                 sel_getUid(cstr!("bounds").as_ptr()));
-        // let bounds: CGRect = CGRect::new(0.0, 0.0, 400.0, 400.0);
 
         // [[UIWindow alloc] initWithFrame:bounds]
         let window: *mut Id = 
-        rust_msg_send(
+        rust_msg_send_1(
             rust_msg_send(objc_getClass(cstr!("UIWindow").as_ptr()), sel_getUid(cstr!("alloc").as_ptr())), 
-                sel_getUid(cstr!("initWithFrame:").as_ptr()), bounds.origin.x, bounds.origin.y, bounds.size.width, bounds.size.height);
+                sel_getUid(cstr!("initWithFrame:").as_ptr()), bounds);
 
         // self.window = window
         let ivar = class_getInstanceVariable(objc_getClass(cstr!("MyAppDelegate").as_ptr()), cstr!("window").as_ptr());
         object_setIvar(obj, ivar, window);
 
-        rust_msg_send::<()>(window, sel_getUid(cstr!("setRootViewController:").as_ptr()), view_controller);
+        // [window setRootViewController: view_controller]
+        rust_msg_send_1::<(), *mut Id>(window, sel_getUid(cstr!("setRootViewController:").as_ptr()), view_controller);
 
+        // [window makeKeyAndVisible]
         rust_msg_send::<()>(window, sel_getUid(cstr!("makeKeyAndVisible").as_ptr()));
     }
     

@@ -115,20 +115,56 @@ extern "C" {
 //     cast_fn(obj, sel, args)
 // }
 
-pub unsafe extern "C" fn rust_msg_send<R>(a: *mut Id, b: Sel, c: ...) -> R {
-    let func = msg_send_fn();
+pub unsafe extern "C" fn rust_msg_send<R>(a: *mut Id, b: Sel) -> R {
+    let func = msg_send_fn::<R>();
+    func(a, b)
+}
+
+fn msg_send_fn<R>() -> unsafe extern "C" fn(*mut Id, Sel) -> R {
+    unsafe { mem::transmute(objc_msgSend as *const extern "C" fn(*mut Id, Sel) -> R) }
+}
+
+pub unsafe extern "C" fn rust_msg_send_1<R, T>(a: *mut Id, b: Sel, c: T) -> R {
+    let func = msg_send_fn_1::<R, T>();
     func(a, b, c)
 }
 
-fn msg_send_fn<R>() -> unsafe extern fn(*mut Id, Sel, ...) -> R {
-    unsafe { mem::transmute(objc_msgSend as unsafe extern "C" fn(_, _, ...) -> _) }
+fn msg_send_fn_1<R, T>() -> unsafe extern "C" fn(*mut Id, Sel, T) -> R {
+    unsafe { mem::transmute(objc_msgSend as *const extern "C" fn(*mut Id, Sel, T) -> R) }
 }
 
-pub unsafe extern "C" fn rust_msg_send_super<R>(a: &ObjcSuper, b: Sel, c: ...) -> R {
-    let func = msg_send_super_fn();
-    func(a, b, c)
+pub unsafe extern "C" fn rust_msg_send_2<R, T, U>(a: *mut Id, b: Sel, c: T, d: U) -> R {
+    let func = msg_send_fn_2::<R, T, U>();
+    func(a, b, c, d)
 }
 
-fn msg_send_super_fn<R>() -> unsafe extern fn(&ObjcSuper, Sel, ...) -> R {
-    unsafe { mem::transmute(objc_msgSendSuper as unsafe extern "C" fn(_, _, ...) -> _) }
+fn msg_send_fn_2<R, T, U>() -> unsafe extern "C" fn(*mut Id, Sel, T, U) -> R {
+    unsafe { mem::transmute(objc_msgSend as *const extern "C" fn(*mut Id, Sel, T, U) -> R) }
+}
+
+pub unsafe extern "C" fn rust_msg_send_4<R, T, U, V, W>(a: *mut Id, b: Sel, c: T, d: U, e: V, f: W) -> R {
+    let func = msg_send_fn_4::<R, T, U, V, W>();
+    func(a, b, c, d, e, f)
+}
+
+fn msg_send_fn_4<R, T, U, V, W>() -> unsafe extern "C" fn(*mut Id, Sel, T, U, V, W) -> R {
+    unsafe { mem::transmute(objc_msgSend as *const extern "C" fn(*mut Id, Sel, T, U, V, W) -> R) }
+}
+
+pub unsafe extern "C" fn rust_msg_send_super<R>(a: &ObjcSuper, b: Sel) -> R {
+    let func = msg_send_super_fn::<R>();
+    func(a, b)
+}
+
+fn msg_send_super_fn<R>() -> unsafe extern "C" fn(&ObjcSuper, Sel) -> R {
+    unsafe { mem::transmute(objc_msgSendSuper as *const extern "C" fn(&ObjcSuper, Sel) -> R) }
+}
+
+pub unsafe extern "C" fn rust_msg_send_super_2<R, T, U>(a: &ObjcSuper, b: Sel, c: T, d: U) -> R {
+    let func = msg_send_super_fn_2::<R, T, U>();
+    func(a, b, c, d)
+}
+
+fn msg_send_super_fn_2<R, T, U>() -> unsafe extern "C" fn(&ObjcSuper, Sel, T, U) -> R {
+    unsafe { mem::transmute(objc_msgSendSuper as *const extern "C" fn(&ObjcSuper, Sel, T, U) -> R) }
 }

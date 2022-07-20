@@ -18,8 +18,4 @@ rustflags = [
     "-C", "link-args=-framework IOKit",
     "-C", "link-args=-framework Foundation",
     "-C", "link-args=-framework UIKit",
-    # "-C", "link-args=-lobjc",
-    "-C", "link-args=-L/Users/mumphus/Documents/temp/Spice/bin",
-    "-C", "link-args=-lios",
-    # "-C", "link-dead-code",
 ]

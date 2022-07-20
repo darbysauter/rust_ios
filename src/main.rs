@@ -8,22 +8,11 @@ use rust_ios::objc::*;
 use rust_ios::viewcontroller::init_my_viewcontroller;
 use rust_ios::app_delegate::init_app_del;
 use cstr::cstr;
-use std::ffi::CStr;
-
-extern "C" {
-    fn initAppDel();
-    fn initMyVC();
-}
 
 #[start]
 fn start(argc: isize, argv: *const *const u8) -> isize {
-    unsafe {
-        initAppDel();
-        initMyVC();
-    }
-
-    // init_app_del();
-    // init_my_viewcontroller();
+    init_app_del();
+    init_my_viewcontroller();
 
     // Create an @autoreleasepool, using the old-stye API. 
     // Note that while NSAutoreleasePool IS deprecated, it still exists 
