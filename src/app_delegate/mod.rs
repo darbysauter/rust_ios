@@ -33,7 +33,7 @@ pub extern "C" fn app_del_did_finish_launching(obj: *mut Id, _cmd: Sel, _applica
         rust_msg_send::<()>(window, sel_getUid(cstr!("makeKeyAndVisible").as_ptr()));
     }
     
-    return Bool::Yes;
+    return YES;
 }
 
 pub fn init_app_del() {

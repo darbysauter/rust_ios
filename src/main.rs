@@ -4,13 +4,20 @@
 #![feature(termination_trait_lib)]
 #![feature(start)]
 
+use std::ffi::CString;
+use std::os::raw::c_char;
 use rust_ios::objc::*;
 use rust_ios::viewcontroller::init_my_viewcontroller;
 use rust_ios::app_delegate::init_app_del;
 use cstr::cstr;
 
-#[start]
-fn start(argc: isize, argv: *const *const u8) -> isize {
+fn main() {
+    // create a vector of zero terminated strings
+    let args = std::env::args().map(|arg| CString::new(arg).unwrap() ).collect::<Vec<CString>>();
+    // convert the strings to raw pointers
+    let c_args = args.iter().map(|arg| arg.as_ptr()).collect::<Vec<*const c_char>>();
+    let (argv, argc, _cap) = c_args.into_raw_parts();
+
     init_app_del();
     init_my_viewcontroller();
 
@@ -36,6 +43,4 @@ fn start(argc: isize, argv: *const *const u8) -> isize {
         // [autorelease_pool drain];
         rust_msg_send::<()>(autorelease_pool, sel_registerName(cstr!("drain").as_ptr()));
     }
-
-    0
 }
