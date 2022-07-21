@@ -18,6 +18,7 @@ const NSLAYOUT_ATTRIBUTE_CENTER_X: i64 = 9;
 const NSLAYOUT_ATTRIBUTE_CENTER_Y: i64 = 10;
 const NSLAYOUT_RELATION_EQUAL: i64 = 0;
 const UICONTROL_STATE_NORMAL: u64 = 0;
+const UICONTROL_STATE_HIGHLIGHTED: u64 = 1 << 0;
 const UICONTROL_EVENT_TOUCH_UP_INSIDE: u64 = 1 << 6;
 
 extern "C" fn my_viewcontroller_load_view(obj: *mut Id, _cmd: Sel) {
@@ -45,11 +46,32 @@ extern "C" fn my_viewcontroller_load_view(obj: *mut Id, _cmd: Sel) {
         // [button setTitle:@"Run" forState:UIControlStateNormal];
         let nsstring: *mut Id = rust_msg_send_1(rust_msg_send(objc_getClass(cstr!("NSString").as_ptr()), sel_getUid(cstr!("alloc").as_ptr())), sel_getUid(cstr!("initWithUTF8String:").as_ptr()), cstr!("Run").as_ptr());
         rust_msg_send_2::<(), *mut Id, u64>(button, sel_getUid(cstr!("setTitle:forState:").as_ptr()), nsstring, UICONTROL_STATE_NORMAL);
+
         // [button setTitleColor:[UIColor colorWithHue:0.0 saturation:0.0 brightness:1.0 alpha:1.0] forState:UIControlStateNormal];
+        let color1: *mut Id = rust_msg_send_4(objc_getClass(cstr!("UIColor").as_ptr()), sel_getUid(cstr!("colorWithHue:saturation:brightness:alpha:").as_ptr()), 0.0f64, 0.0f64, 1.0f64, 1.0f64);
+        rust_msg_send_2::<(), *mut Id, u64>(button, sel_getUid(cstr!("setTitleColor:forState:").as_ptr()), color1, UICONTROL_STATE_NORMAL);
+
         // [button setTitleColor:[UIColor colorWithHue:0.0 saturation:0.0 brightness:0.7 alpha:1.0] forState:UIControlStateHighlighted];
+        let color2: *mut Id = rust_msg_send_4(objc_getClass(cstr!("UIColor").as_ptr()), sel_getUid(cstr!("colorWithHue:saturation:brightness:alpha:").as_ptr()), 0.0f64, 0.0f64, 0.7f64, 1.0f64);
+        rust_msg_send_2::<(), *mut Id, u64>(button, sel_getUid(cstr!("setTitleColor:forState:").as_ptr()), color2, UICONTROL_STATE_HIGHLIGHTED);
+
         // [button setBackgroundColor:[UIColor colorWithRed:0.00 green:0.00 blue:1.00 alpha:1.0]];
+        let color3: *mut Id = rust_msg_send_4(objc_getClass(cstr!("UIColor").as_ptr()), sel_getUid(cstr!("colorWithRed:green:blue:alpha:").as_ptr()), 0.0f64, 0.0f64, 1.0f64, 1.0f64);
+        rust_msg_send_1::<(), *mut Id>(button, sel_getUid(cstr!("setBackgroundColor:").as_ptr()), color3);
+
         // button.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
+        let edge_insets = UIEdgeInsets::new(0.0, 0.0, 0.0, 0.0);
+        let edge_insets: *mut Id = rust_msg_send_1(objc_getClass(cstr!("NSValue").as_ptr()), sel_getUid(cstr!("valueWithEdgeInsets:").as_ptr()), edge_insets);
+        let nsstring: *mut Id = rust_msg_send_1(rust_msg_send(objc_getClass(cstr!("NSString").as_ptr()), sel_getUid(cstr!("alloc").as_ptr())), sel_getUid(cstr!("initWithUTF8String:").as_ptr()), cstr!("titleEdgeInsets").as_ptr());
+        rust_msg_send_2::<(), *mut Id, *mut Id>(button, sel_getUid(cstr!("setValue:forKey:").as_ptr()), edge_insets, nsstring);
+
         // button.titleLabel.font = [UIFont systemFontOfSize:30];
+        let nsstring: *mut Id = rust_msg_send_1(rust_msg_send(objc_getClass(cstr!("NSString").as_ptr()), sel_getUid(cstr!("alloc").as_ptr())), sel_getUid(cstr!("initWithUTF8String:").as_ptr()), cstr!("titleLabel").as_ptr());
+        let title_label: *mut Id = rust_msg_send_1(button, sel_getUid(cstr!("valueForKey:").as_ptr()), nsstring);
+        let nsstring: *mut Id = rust_msg_send_1(rust_msg_send(objc_getClass(cstr!("NSString").as_ptr()), sel_getUid(cstr!("alloc").as_ptr())), sel_getUid(cstr!("initWithUTF8String:").as_ptr()), cstr!("font").as_ptr());
+        let font: *mut Id = rust_msg_send_1(objc_getClass(cstr!("UIFont").as_ptr()), sel_getUid(cstr!("systemFontOfSize:").as_ptr()), 30.0f64);
+        rust_msg_send_2::<(), *mut Id, *mut Id>(title_label, sel_getUid(cstr!("setValue:forKey:").as_ptr()), font, nsstring);
+
         // [button addTarget:self action:@selector(actionJailbreak) forControlEvents:UIControlEventTouchUpInside];
         rust_msg_send_3::<(), *mut Id, Sel, u64>(button, sel_getUid(cstr!("addTarget:action:forControlEvents:").as_ptr()), obj, sel_getUid(cstr!("buttonTapped").as_ptr()), UICONTROL_EVENT_TOUCH_UP_INSIDE);
         
