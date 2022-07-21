@@ -1,5 +1,9 @@
 use std::os::raw::{ c_char, c_int };
 use std::mem;
+use std::ffi::CString;
+use cstr::cstr;
+
+use core::fmt;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(transparent)]
@@ -126,10 +130,25 @@ extern "C" {
     pub fn NSLog(string: *mut Id);
 }
 
-// pub unsafe extern "C" fn rust_objc_msg_send_ret_cgrect(obj: Id, sel: Sel, args: ...) -> CGRect {
-//     let cast_fn: MsgSendRetCGRect = *(&objc_msgSend as *const _ as usize as *const MsgSendRetCGRect);
-//     cast_fn(obj, sel, args)
-// }
+#[macro_export]
+macro_rules! nslog {
+    ($($arg:tt)*) => ($crate::objc::_rust_log(format_args!($($arg)*)));
+}
+
+#[macro_export]
+macro_rules! nslogln {
+    () => ($crate::nslog!("\n"));
+    ($($arg:tt)*) => ($crate::nslog!("{}\n", format_args!($($arg)*)));
+}
+
+pub fn _rust_log(s: fmt::Arguments) {
+    unsafe {
+        let s = format!("LOG: {}", s);
+        let c_str = CString::new(s).unwrap();
+        let nsstring: *mut Id = rust_msg_send_1(rust_msg_send(objc_getClass(cstr!("NSString").as_ptr()), sel_getUid(cstr!("alloc").as_ptr())), sel_getUid(cstr!("initWithUTF8String:").as_ptr()), c_str.as_ptr());
+        NSLog(nsstring);
+    }
+}
 
 pub unsafe extern "C" fn rust_msg_send<R>(a: *mut Id, b: Sel) -> R {
     let func = msg_send_fn::<R>();

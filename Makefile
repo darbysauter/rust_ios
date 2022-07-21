@@ -45,6 +45,9 @@ rust_ios.ipa: $(APP)
 install: rust_ios.ipa
 	ideviceinstaller -i rust_ios.ipa
 
-.PHONY: clean install
+log:
+	idevicesyslog -p RustIos -m LOG:
+
+.PHONY: clean install log
 clean:
 	rm -rf MakeTest.ipa

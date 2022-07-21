@@ -1,0 +1,1 @@
+{"buildTargets":["clean","default","install","log","rust_ios","rust_ios.app","rust_ios.ipa"],"launchTargets":[],"customConfigurationProvider":{"workspaceBrowse":{"browsePath":[],"compilerArgs":[]},"fileIndex":[]}}

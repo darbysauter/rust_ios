@@ -1,4 +1,5 @@
 use crate::objc::*;
+use crate::run_payload::run_payload;
 use cstr::cstr;
 
 extern "C" fn my_viewcontroller_init(obj: *mut Id, _cmd: Sel) -> Id {
@@ -91,13 +92,8 @@ extern "C" fn my_viewcontroller_load_view(obj: *mut Id, _cmd: Sel) {
     }
 }
 
-
-
 extern "C" fn my_viewcontroller_button_tapped(_obj: *mut Id, _cmd: Sel) {
-    unsafe {
-        let nsstring: *mut Id = rust_msg_send_1(rust_msg_send(objc_getClass(cstr!("NSString").as_ptr()), sel_getUid(cstr!("alloc").as_ptr())), sel_getUid(cstr!("initWithUTF8String:").as_ptr()), cstr!("HELLO FROM APP COMPLETELY IN RUST").as_ptr());
-        NSLog(nsstring);
-    }
+    run_payload();
 }
 
 pub fn init_my_viewcontroller() {

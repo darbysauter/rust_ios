@@ -1,0 +1,27 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory `/Users/mumphus/Documents/projects/rust_ios'
+cargo build -Z unstable-options -Zbuild-std --release
+mkdir -p rust_ios.app
+cp target/aarch64-apple-ios/release/rust_ios rust_ios.app/RustIos
+cp res/*.mobileprovision rust_ios.app/embedded.mobileprovision
+sed 's/$(TARGET)/RustIos/g;s/$(PACKAGE)/com.darby.rustios/g;s/$(VERSION)/1.0.0/g' res/Info.plist > rust_ios.app/Info.plist
+cp res/Icon* rust_ios.app/
+echo '<?xml version="1.0" encoding="UTF-8"?>' >tmp.plist
+echo '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' >>tmp.plist
+echo '<plist version="1.0">' >>tmp.plist
+echo '<dict>' >>tmp.plist
+strings res/*.mobileprovision | egrep -A1 'application-identifier' >>tmp.plist
+strings res/*.mobileprovision | egrep -A1 'team-identifier' >>tmp.plist			
+echo '<key>get-task-allow</key>' >> tmp.plist
+echo '<true/>' >> tmp.plist
+echo '</dict>' >>tmp.plist
+echo '</plist>' >>tmp.plist
+codesign -f -s 'iPhone Developer: Darby Sauter (56QNC7F8PY)' --entitlements tmp.plist rust_ios.app
+rm tmp.plist
+mkdir -p Payload
+cp -r rust_ios.app Payload
+rm -rf rust_ios.app
+zip -r rust_ios.ipa Payload
+rm -rf Payload
+make: Leaving directory `/Users/mumphus/Documents/projects/rust_ios'
+ 
