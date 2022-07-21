@@ -130,6 +130,9 @@ extern "C" {
     pub fn NSLog(string: *mut Id);
 }
 
+// Note this nslog will use objective C format specifiers
+// https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Strings/Articles/formatSpecifiers.html#//apple_ref/doc/uid/TP40004265-SW1
+// Really if theres a % just do %%
 #[macro_export]
 macro_rules! nslog {
     ($($arg:tt)*) => ($crate::objc::_rust_log(format_args!($($arg)*)));
